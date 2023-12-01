@@ -1,13 +1,19 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
-namespace Player
+namespace Entities.Player
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class Movement : MonoBehaviour
+    public class PlayerController : MonoBehaviour
     {
         [SerializeField] private float speed = 100f;
         [SerializeField] private Transform cameraTransform;
-        
+        [SerializeField] private float powerUpDuration = 5f;
+        private Coroutine _powerUpCoroutine;
+        public Action OnPowerUpStart;
+        public Action OnPowerUpEnd;
+
         private Rigidbody _rigidbody;
 
         private void Start()
@@ -37,6 +43,23 @@ namespace Player
 
             Vector3 direction = (horizontalDirection + verticalDirection).normalized;
             _rigidbody.velocity = direction * speed * Time.fixedDeltaTime;
+        }
+
+        public void PickPowerUp()
+        {
+            if (_powerUpCoroutine != null)
+            {
+                StopCoroutine(_powerUpCoroutine);
+            }
+            
+            _powerUpCoroutine = StartCoroutine(StartPowerUp());
+        }
+
+        private IEnumerator StartPowerUp()
+        {
+            OnPowerUpStart?.Invoke();
+            yield return new WaitForSeconds(powerUpDuration);
+            OnPowerUpEnd?.Invoke();
         }
     }
 }
