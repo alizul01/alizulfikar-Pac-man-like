@@ -1,20 +1,43 @@
 using System;
 using System.Collections;
+using Entities.Enemy;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Entities.Player
 {
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerController : MonoBehaviour
     {
-        [SerializeField] private float speed = 100f;
+        [Header("Player Properties")] [SerializeField]
+        private float speed = 100f;
+
         [SerializeField] private Transform cameraTransform;
         [SerializeField] private float powerUpDuration = 5f;
+
+        #region Private Variables
+
         private Coroutine _powerUpCoroutine;
+        private bool _isPowerUpActive;
+        private Rigidbody _rigidbody;
+        [SerializeField] private Transform spawnPoint;
+        [SerializeField] private int health;
+
+        #endregion
+
+        #region Public Events
+
         public Action OnPowerUpStart;
         public Action OnPowerUpEnd;
 
-        private Rigidbody _rigidbody;
+        #endregion
+
+        #region UI Events
+
+        [SerializeField] private TMP_Text healthText;
+
+        #endregion
 
         private void Start()
         {
@@ -22,13 +45,19 @@ namespace Entities.Player
             _rigidbody.freezeRotation = true;
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+            UpdateUI();
+        }
+
+        private void UpdateUI()
+        {
+            healthText.text = "Health: " + health;
         }
 
         private void FixedUpdate()
         {
             MovePlayer();
         }
-        
+
         private void MovePlayer()
         {
             var horizontal = Input.GetAxis("Horizontal");
@@ -51,15 +80,41 @@ namespace Entities.Player
             {
                 StopCoroutine(_powerUpCoroutine);
             }
-            
+
             _powerUpCoroutine = StartCoroutine(StartPowerUp());
         }
 
         private IEnumerator StartPowerUp()
         {
+            _isPowerUpActive = true;
             OnPowerUpStart?.Invoke();
             yield return new WaitForSeconds(powerUpDuration);
+            _isPowerUpActive = false;
             OnPowerUpEnd?.Invoke();
+        }
+
+        private void OnCollisionEnter(Collision other)
+        {
+            if (!other.gameObject.CompareTag("Enemy")) return;
+            if (_isPowerUpActive)
+            {
+                other.gameObject.GetComponent<EnemyController>().Dead();
+            }
+            else
+            {
+                Dead();
+            }
+        }
+
+        public void Dead()
+        {
+            transform.position = spawnPoint.position;
+            health--;
+            UpdateUI();
+            if (health <= 0)
+            {
+                Debug.Log("Game Over");
+            }
         }
     }
 }

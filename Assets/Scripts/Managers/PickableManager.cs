@@ -10,6 +10,7 @@ namespace Managers
         [Header("Pickable List")]
         [SerializeField] private List<Pickable> pickableList = new List<Pickable>();
         [SerializeField] private PlayerController player;
+        [SerializeField] private ScoreManager scoreManager;
         private void Start()
         {
             InitPickableList();
@@ -25,12 +26,13 @@ namespace Managers
                 pickable.OnPicked += OnPickablePicked;
             }
             
-            Debug.Log("Pickable list initialized with " + pickableList.Count + " items.");
+            scoreManager.SetMaxScore(pickableList.Count);
         }
 
         private void OnPickablePicked(Pickable pickable)
         {
             pickableList.Remove(pickable);
+            scoreManager.AddScore(1);
             if (pickable.type == PickableType.PowerUp)
             {
                 player.PickPowerUp();

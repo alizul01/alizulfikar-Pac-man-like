@@ -4,9 +4,12 @@ namespace Entities.Enemy.State
 {
     public class ChaseState: IEnemyBaseState
     {
+        private static readonly int ChaseState1 = Animator.StringToHash("ChaseState");
+
         public void EnterState(EnemyController enemy)
         {
             Debug.Log("Start Chase");
+            enemy.animator.SetTrigger(ChaseState1);
         }
 
         public void UpdateState(EnemyController enemy)

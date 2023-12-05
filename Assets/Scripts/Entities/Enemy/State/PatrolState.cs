@@ -2,13 +2,16 @@
 
 namespace Entities.Enemy.State
 {
-    public class PatrolState: IEnemyBaseState
+    public class PatrolState : IEnemyBaseState
     {
         public bool IsMoving;
         private Vector3 _destination;
+        private static readonly int PatrolStateAnimation = Animator.StringToHash("PatrolState");
+
         public void EnterState(EnemyController enemy)
         {
             IsMoving = false;
+            enemy.animator.SetTrigger(PatrolStateAnimation);
         }
 
         public void UpdateState(EnemyController enemy)
@@ -17,6 +20,7 @@ namespace Entities.Enemy.State
             {
                 enemy.TransitionToState(enemy.ChaseState);
             }
+
             if (!IsMoving)
             {
                 IsMoving = true;

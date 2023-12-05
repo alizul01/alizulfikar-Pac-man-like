@@ -19,6 +19,7 @@ namespace Entities.Enemy
         public ChaseState ChaseState = new ChaseState();
         public RetreatState RetreatChaseState = new RetreatState();
         public NavMeshAgent navMeshAgent;
+        public Animator animator;
         
         [SerializeField] public float chaseDistance = 10f;
         [SerializeField] public PlayerController player;
@@ -29,6 +30,7 @@ namespace Entities.Enemy
             _currentState.EnterState(this);
             navMeshAgent = GetComponent<NavMeshAgent>();
             player = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
+            animator = GetComponent<Animator>();
             
             player.OnPowerUpStart += StartRetreat;
             player.OnPowerUpEnd += EndRetreat;
@@ -47,6 +49,7 @@ namespace Entities.Enemy
         
         public void TransitionToState(IEnemyBaseState state)
         {
+            if (_currentState == null) return;
             _currentState.ExitState(this);
             _currentState = state;
             _currentState.EnterState(this);
@@ -74,6 +77,13 @@ namespace Entities.Enemy
         private void EndRetreat()
         {
             TransitionToState(PatrolState);
+        }
+        
+        public void Dead()
+        {
+            _currentState.ExitState(this);
+            _currentState = null;
+            Destroy(gameObject);
         }
     }
 }

@@ -6,10 +6,12 @@ namespace Entities.Enemy.State
 {
     public class RetreatState: IEnemyBaseState
     {
-       
+        private static readonly int RetreatState1 = Animator.StringToHash("RetreatState");
+
         public void EnterState(EnemyController enemy)
         {
             Debug.Log("Start Retreat");
+            enemy.animator.SetTrigger(RetreatState1);
         }
 
         public void UpdateState(EnemyController enemy)
