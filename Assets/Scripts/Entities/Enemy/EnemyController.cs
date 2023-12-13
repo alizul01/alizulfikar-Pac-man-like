@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Entities.Enemy.State;
 using Entities.Player;
 using UnityEngine;
@@ -29,14 +30,17 @@ namespace Entities.Enemy
             _currentState = PatrolState;
             _currentState.EnterState(this);
             navMeshAgent = GetComponent<NavMeshAgent>();
-            player = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
-            animator = GetComponent<Animator>();
-            
-            player.OnPowerUpStart += StartRetreat;
-            player.OnPowerUpEnd += EndRetreat;
-            
+
             InitializeWaypoints();
         }
+
+        private void Start()
+        {
+            Debug.Log("Player reference: " + player);
+            player.OnPowerUpStart += StartRetreat;
+            player.OnPowerUpEnd += EndRetreat;
+        }
+
 
         private void InitializeWaypoints()
         {
@@ -71,13 +75,16 @@ namespace Entities.Enemy
         
         private void StartRetreat()
         {
+            Debug.Log("Start Retreat");
             TransitionToState(RetreatChaseState);
         }
-        
+
         private void EndRetreat()
         {
+            Debug.Log("End Retreat");
             TransitionToState(PatrolState);
         }
+
         
         public void Dead()
         {

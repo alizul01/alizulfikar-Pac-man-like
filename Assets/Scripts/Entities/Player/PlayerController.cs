@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Entities.Enemy;
+using Managers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -15,6 +16,10 @@ namespace Entities.Player
 
         [SerializeField] private Transform cameraTransform;
         [SerializeField] private float powerUpDuration = 5f;
+        [SerializeField] private GameObject playerModel;
+        [SerializeField] private AudioClip[] sfxClips;
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] public MainMenuManager mainMenuManager;
 
         #region Private Variables
 
@@ -72,10 +77,18 @@ namespace Entities.Player
 
             Vector3 direction = (horizontalDirection + verticalDirection).normalized;
             _rigidbody.velocity = direction * speed * Time.fixedDeltaTime;
+
+            // player rotation follow camera
+            if (direction == Vector3.zero) return;
+            var toRotation = Quaternion.LookRotation(direction);
+            toRotation.eulerAngles = new Vector3(-90, toRotation.eulerAngles.y, 87);
+            playerModel.transform.rotation = Quaternion.Slerp(playerModel.transform.rotation, toRotation,
+                Time.fixedDeltaTime * 5f);
         }
 
         public void PickPowerUp()
         {
+            Debug.Log("PowerUp Picked");
             if (_powerUpCoroutine != null)
             {
                 StopCoroutine(_powerUpCoroutine);
@@ -83,6 +96,7 @@ namespace Entities.Player
 
             _powerUpCoroutine = StartCoroutine(StartPowerUp());
         }
+
 
         private IEnumerator StartPowerUp()
         {
@@ -98,6 +112,7 @@ namespace Entities.Player
             if (!other.gameObject.CompareTag("Enemy")) return;
             if (_isPowerUpActive)
             {
+                audioSource.PlayOneShot(sfxClips[1]);
                 other.gameObject.GetComponent<EnemyController>().Dead();
             }
             else
@@ -108,12 +123,13 @@ namespace Entities.Player
 
         public void Dead()
         {
+            audioSource.PlayOneShot(sfxClips[0]);
             transform.position = spawnPoint.position;
             health--;
             UpdateUI();
             if (health <= 0)
             {
-                Debug.Log("Game Over");
+                mainMenuManager.Play("Lose");
             }
         }
     }

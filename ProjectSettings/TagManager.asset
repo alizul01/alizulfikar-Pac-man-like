@@ -8,6 +8,8 @@ TagManager:
   - Enemy
   - Ground
   - Wall
+  - FxTemporaire
+  - Audio
   layers:
   - Default
   - TransparentFX

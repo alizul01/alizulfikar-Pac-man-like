@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Entities.Player;
 using Objects;
@@ -11,13 +12,9 @@ namespace Managers
         [SerializeField] private List<Pickable> pickableList = new List<Pickable>();
         [SerializeField] private PlayerController player;
         [SerializeField] private ScoreManager scoreManager;
-        private void Start()
-        {
-            InitPickableList();
-            player = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
-        }
+        [SerializeField] private MainMenuManager mainMenuManager;
 
-        private void InitPickableList()
+        public void InitPickableList()
         {
             var pickables = GameObject.FindObjectsOfType<Pickable>();
             foreach (var pickable in pickables)
@@ -27,6 +24,7 @@ namespace Managers
             }
             
             scoreManager.SetMaxScore(pickableList.Count);
+            Debug.Log($"Pickable list initialized with {pickableList.Count} items");
         }
 
         private void OnPickablePicked(Pickable pickable)
@@ -38,6 +36,8 @@ namespace Managers
                 player.PickPowerUp();
             }
             if (pickableList.Count > 0) return;
+            player.mainMenuManager.Play("Win");
+            
         }
     }
 }
